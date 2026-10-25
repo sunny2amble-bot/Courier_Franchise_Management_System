@@ -1,0 +1,125 @@
+<html></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Parcels</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            margin: 0;
+            padding: 30px;
+        }
+
+        h1 {
+            color: #1e3a8a;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background: #1e40af;
+            color: white;
+        }
+
+        #message {
+            text-align: center;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Registered Parcels</h1>
+
+    <div class="container">
+        <p id="message">Loading parcels...</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Parcel ID</th>
+                    <th>Tracking ID</th>
+                    <th>Sender ID</th>
+                    <th>Receiver Name</th>
+                    <th>Receiver Phone</th>
+                    <th>Weight (kg)</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="parcelTable"></tbody>
+        </table>
+    </div>
+
+    <script>
+        async function loadParcels() {
+            const message = document.getElementById("message");
+            const table = document.getElementById("parcelTable");
+
+            try {
+                const response = await fetch("/api/parcels");
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    message.textContent = result.message || "Failed to load parcels.";
+                    return;
+                }
+
+                table.innerHTML = "";
+
+                if (result.parcels.length === 0) {
+                    message.textContent = "No parcels found.";
+                    return;
+                }
+
+                result.parcels.forEach(parcel => {
+                    const row = document.createElement("tr");
+
+                    [
+                        parcel.parcel_id,
+                        parcel.tracking_id,
+                        parcel.sender_id,
+                        parcel.receiver_name,
+                        parcel.receiver_phone,
+                        parcel.weight,
+                        parcel.status || "Booked"
+                    ].forEach(value => {
+                        const cell = document.createElement("td");
+                        cell.textContent = value ?? "";
+                        row.appendChild(cell);
+                    });
+
+                    table.appendChild(row);
+                });
+
+                message.textContent = "Total parcels: " + result.parcels.length;
+            } catch (error) {
+                message.textContent = "Error loading parcels. Please check the server.";
+            }
+        }
+
+        loadParcels();
+    </script>
+</body>
+</html>

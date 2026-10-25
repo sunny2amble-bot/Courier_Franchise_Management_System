@@ -1,0 +1,2 @@
+ALTER TABLE parcels
+ADD COLUMN status VARCHAR(50) NOT NULL DEFAULT 'Booked';

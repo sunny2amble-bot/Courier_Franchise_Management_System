@@ -1,0 +1,122 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Customers</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #1d4ed8;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background: #1d4ed8;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background: #f1f5f9;
+        }
+
+        #message {
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Registered Customers</h2>
+        <p id="message">Loading customers...</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Full Name</th>
+                    <th>Phone</th>
+                    <th>Address</th>
+                    <th>Created At</th>
+                </tr>
+            </thead>
+            <tbody id="customerList"></tbody>
+        </table>
+    </div>
+
+    <script>
+        async function loadCustomers() {
+            const message = document.getElementById("message");
+            const customerList = document.getElementById("customerList");
+
+            try {
+                const response = await fetch("/api/customers");
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    throw new Error("Failed to load customers");
+                }
+
+                customerList.replaceChildren();
+
+                if (result.customers.length === 0) {
+                    message.textContent = "No customers registered yet.";
+                    return;
+                }
+
+                result.customers.forEach(function(customer) {
+                    const row = document.createElement("tr");
+
+                    [
+                        customer.customer_id,
+                        customer.full_name,
+                        customer.phone,
+                        customer.address || "",
+                        customer.created_at
+                            ? new Date(customer.created_at).toLocaleString()
+                            : ""
+                    ].forEach(function(value) {
+                        const cell = document.createElement("td");
+                        cell.textContent = value;
+                        row.appendChild(cell);
+                    });
+
+                    customerList.appendChild(row);
+                });
+
+                message.textContent = "Total customers: " + result.customers.length;
+            } catch (error) {
+                message.textContent = "Unable to load customers: " + error.message;
+            }
+        }
+
+        loadCustomers();
+    </script>
+</body>
+</html>

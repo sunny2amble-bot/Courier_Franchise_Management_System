@@ -1,0 +1,128 @@
+<html></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View COD Payments</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            margin: 0;
+            padding: 30px;
+        }
+
+        h1 {
+            color: #1e3a8a;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background: #1e40af;
+            color: white;
+        }
+
+        #message {
+            text-align: center;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>COD Payments</h1>
+
+    <div class="container">
+        <p id="message">Loading payments...</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Payment ID</th>
+                    <th>Parcel ID</th>
+                    <th>Amount (₹)</th>
+                    <th>Payment Status</th>
+                    <th>Payment Date</th>
+                    <th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody id="paymentTable"></tbody>
+        </table>
+    </div>
+
+    <script>
+        async function loadPayments() {
+            const message = document.getElementById("message");
+            const table = document.getElementById("paymentTable");
+
+            try {
+                const response = await fetch("/api/cod-payments");
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    message.textContent =
+                        result.message || "Failed to load payments.";
+                    return;
+                }
+
+                table.innerHTML = "";
+
+                if (result.payments.length === 0) {
+                    message.textContent = "No COD payments found.";
+                    return;
+                }
+
+                result.payments.forEach(payment => {
+                    const row = document.createElement("tr");
+
+                    [
+                        payment.payment_id,
+                        payment.parcel_id,
+                        payment.amount,
+                        payment.payment_status,
+                        payment.payment_date,
+                        payment.remarks
+                    ].forEach(value => {
+                        const cell = document.createElement("td");
+                        cell.textContent = value ?? "";
+                        row.appendChild(cell);
+                    });
+
+                    table.appendChild(row);
+                });
+
+                message.textContent =
+                    "Total payments: " + result.payments.length;
+            } catch (error) {
+                message.textContent =
+                    "Error loading payments. Please check the server.";
+            }
+        }
+
+        loadPayments();
+    </script>
+</body>
+</html>

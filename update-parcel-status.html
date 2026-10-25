@@ -1,0 +1,102 @@
+<html></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Parcel Status</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 25px;
+            background: white;
+            border-radius: 10px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #1e3a8a;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 12px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background: #1e40af;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #message {
+            text-align: center;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Update Parcel Status</h1>
+
+        <form id="statusForm">
+            <input
+                type="text"
+                id="tracking_id"
+                placeholder="Enter Tracking ID"
+                required
+            >
+
+            <select id="status" required>
+                <option value="">Select New Status</option>
+                <option value="Booked">Booked</option>
+                <option value="In Transit">In Transit</option>
+                <option value="Delivered">Delivered</option>
+            </select>
+
+            <button type="submit">Update Status</button>
+        </form>
+
+        <p id="message"></p>
+    </div>
+
+    <script>
+        document.getElementById("statusForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const tracking_id = document.getElementById("tracking_id").value.trim();
+            const status = document.getElementById("status").value;
+            const message = document.getElementById("message");
+
+            try {
+                const response = await fetch(
+                    "/api/parcels/" + encodeURIComponent(tracking_id) + "/status",
+                    {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ status })
+                    }
+                );
+
+                const result = await response.json();
+                message.textContent = result.message || "Request completed.";
+            } catch (error) {
+                message.textContent = "Unable to update status. Check the server.";
+            }
+        });
+    </script>
+</body>
+</html>

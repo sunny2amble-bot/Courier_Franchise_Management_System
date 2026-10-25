@@ -1,0 +1,181 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Courier Franchise Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #102542, #1b4965);
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            width: 100%;
+            max-width: 400px;
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+        }
+
+        .logo {
+            text-align: center;
+            font-size: 45px;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 23px;
+            color: #102542;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 18px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        input:focus, select:focus {
+            outline: 2px solid #1b75bb;
+            border-color: transparent;
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            background: #102542;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1b4965;
+        }
+
+        #message {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 14px;
+            color: #b42318;
+        }
+
+        footer {
+            text-align: center;
+            color: #777;
+            font-size: 12px;
+            margin-top: 22px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">📦</div>
+
+        <h1>Courier Franchise</h1>
+        <p class="subtitle">Management System</p>
+
+        <form id="loginForm">
+            <label for="email">Email Address</label>
+            <input
+                type="email"
+                id="email"
+                placeholder="Enter your email"
+                required
+            >
+
+            <label for="password">Password</label>
+            <input
+                type="password"
+                id="password"
+                placeholder="Enter your password"
+                required
+            >
+
+            <label for="role">Select Role</label>
+            <select id="role" required>
+                <option value="">Select your role</option>
+                <option value="Admin / Owner">Admin / Owner</option>
+                <option value="staff">Staff / Operator</option>
+                <option value="customer">Customer</option>
+            </select>
+
+            <button type="submit">Login</button>
+
+            <p id="message"></p>
+        </form>
+
+        <footer>
+            Courier Franchise Management System
+        </footer>
+    </div>
+
+    <script>
+        const loginForm = document.getElementById("loginForm");
+        const message = document.getElementById("message");
+
+        
+loginForm.addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const role = document.getElementById("role").value;
+
+    try {
+        const response = await fetch("/api/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ email, password, role })
+        });
+
+        const result = await response.json();
+        message.textContent = result.message;
+
+        if (response.ok && result.success) {
+            window.location.href = "/dashboard.html";
+        }
+    } catch (error) {
+        message.textContent = "Server connection failed.";
+    }
+});
+
+    </script>
+</body>
+</html>

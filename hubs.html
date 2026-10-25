@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hub Registration</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            margin: 0;
+            padding: 30px;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #1e3a8a;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 25px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-top: 12px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 11px;
+            margin-top: 6px;
+            box-sizing: border-box;
+            border: 1px solid #cbd5e1;
+            border-radius: 5px;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 20px;
+            padding: 12px;
+            background: #1e40af;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1e3a8a;
+        }
+
+        #message {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background: #1e40af;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Hub Registration</h1>
+
+    <div class="container">
+        <form id="hubForm">
+            <label for="hub_name">Hub Name</label>
+            <input type="text" id="hub_name" required>
+
+            <label for="city">City</label>
+            <input type="text" id="city" required>
+
+            <label for="address">Address</label>
+            <input type="text" id="address" required>
+
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone"
+                   pattern="[0-9]{10}" maxlength="10" required>
+
+            <button type="submit">Register Hub</button>
+        </form>
+
+        <p id="message"></p>
+    </div>
+
+    <div class="container">
+        <h2>Registered Hubs</h2>
+        <p id="hubCount">Loading hubs...</p>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Hub ID</th>
+                        <th>Hub Name</th>
+                        <th>City</th>
+                        <th>Address</th>
+                    </tr>
+                </thead>
+                <tbody id="hubTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const hubForm = document.getElementById("hubForm");
+        const message = document.getElementById("message");
+
+        hubForm.addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const hub = {
+                hub_name: document.getElementById("hub_name").value.trim(),
+                city: document.getElementById("city").value.trim(),
+                address: document.getElementById("address").value.trim(),
+                phone: document.getElementById("phone").value.trim()
+            };
+
+            try {
+                const response = await fetch("/api/hubs", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(hub)
+                });
+
+                const result = await response.json();
+
+                message.textContent = result.message ||
+                    (response.ok ? "Hub registered successfully." : "Registration failed.");
+
+                message.style.color = response.ok ? "green" : "red";
+
+                if (response.ok && result.success) {
+                    hubForm.reset();
+                    loadHubs();
+                }
+            } catch (error) {
+                message.textContent = "Server error. Please check the server.";
+                message.style.color = "red";
+            }
+        });
+
+        async function loadHubs() {
+            const hubTable = document.getElementById("hubTable");
+            const hubCount = document.getElementById("hubCount");
+
+            try {
+                const response = await fetch("/api/hubs");
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    hubCount.textContent = "Failed to load hubs.";
+                    return;
+                }
+
+                hubTable.innerHTML = "";
+
+                if (result.hubs.length === 0) {
+                    hubCount.textContent = "No hubs found.";
+                    return;
+                }
+
+                result.hubs.forEach(hub => {
+                    const row = document.createElement("tr");
+
+                    [
+                        hub.hub_id,
+                        hub.hub_name,
+                        hub.city,
+                        hub.address
+                    ].forEach(value => {
+                        const cell = document.createElement("td");
+                        cell.textContent = value ?? "";
+                        row.appendChild(cell);
+                    });
+
+                    hubTable.appendChild(row);
+                });
+
+                hubCount.textContent = "Total hubs: " + result.hubs.length;
+            } catch (error) {
+                hubCount.textContent = "Error loading hubs. Please check the server.";
+            }
+        }
+
+        loadHubs();
+    </script>
+</body>
+</html>

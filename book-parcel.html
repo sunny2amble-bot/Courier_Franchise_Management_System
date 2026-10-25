@@ -1,0 +1,123 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parcel Booking</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 20px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        h2 {
+            text-align: center;
+            color: #1d4ed8;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+        }
+
+        input, textarea, button {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px;
+            margin-top: 6px;
+        }
+
+        button {
+            background: #1d4ed8;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        #message {
+            margin-top: 15px;
+            overflow-wrap: anywhere;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Parcel Booking</h2>
+
+        <form id="parcelForm">
+            <label for="sender_id">Sender Customer ID</label>
+            <input type="number" id="sender_id" min="1" required>
+
+            <label for="receiver_name">Receiver Name</label>
+            <input type="text" id="receiver_name" required>
+
+            <label for="receiver_phone">Receiver Phone</label>
+            <input type="tel" id="receiver_phone" required>
+
+            <label for="receiver_address">Receiver Address</label>
+            <textarea id="receiver_address" rows="3" required></textarea>
+
+            <label for="weight">Parcel Weight (kg)</label>
+            <input type="number" id="weight" min="0.01" step="0.01" required>
+
+            <button type="submit">Book Parcel</button>
+        </form>
+
+        <p id="message" role="status"></p>
+    </div>
+
+    <script>
+        const form = document.getElementById("parcelForm");
+        const message = document.getElementById("message");
+
+        form.addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const parcel = {
+                sender_id: Number(document.getElementById("sender_id").value),
+                receiver_name: document.getElementById("receiver_name").value.trim(),
+                receiver_phone: document.getElementById("receiver_phone").value.trim(),
+                receiver_address: document.getElementById("receiver_address").value.trim(),
+                weight: Number(document.getElementById("weight").value)
+            };
+
+            try {
+                const response = await fetch("/api/parcels", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(parcel)
+                });
+
+                const result = await response.json();
+                message.textContent = result.message ||
+                    (result.success ? "Parcel booked successfully!" : "Parcel booking failed.");
+
+                if (response.ok && result.success) {
+                    message.textContent += " Tracking ID: " + result.tracking_id;
+                    form.reset();
+                }
+            } catch (error) {
+                console.error("Parcel booking error:", error);
+                message.textContent = "Error: " + error.message;
+            }
+        });
+    </script>
+</body>
+</html>
